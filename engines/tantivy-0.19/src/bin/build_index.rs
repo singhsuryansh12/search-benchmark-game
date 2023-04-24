@@ -1,29 +1,34 @@
 use futures::executor::block_on;
+use tantivy::tokenizer::WhitespaceTokenizer;
 use std::env;
 use std::io::BufRead;
 use std::path::Path;
 use tantivy::schema::{Schema, STORED, TEXT};
-use tantivy::Index;
+use tantivy::{doc, Index};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    main_inner(&Path::new(&args[1])).unwrap();
+    main_inner(Path::new(&args[1])).unwrap();
 }
 
 fn create_schema() -> Schema {
     let mut schema_builder = Schema::builder();
-    schema_builder.add_text_field("id", STORED);
-    schema_builder.add_text_field("text", TEXT);
+    schema_builder.add_text_field("body", TEXT);
     schema_builder.build()
 }
 
 fn main_inner(output_dir: &Path) -> tantivy::Result<()> {
     env_logger::init();
 
-    let schema = create_schema();
+    let mut schema_builder = Schema::builder();
+    WhitespaceTokenizer
+    let body = schema_builder.add_text_field("body", TEXT);
+    let schema = schema_builder.build();
+
     let index = Index::create_in_dir(output_dir, schema.clone()).expect("failed to create index");
 
     let mut i = 0;
+    let mut num_skipped = 0;
     {
         let mut index_writer = index
             .writer_with_num_threads(4, 2_000_000_000)
@@ -35,11 +40,20 @@ fn main_inner(output_dir: &Path) -> tantivy::Result<()> {
             if line.trim().is_empty() {
                 continue;
             }
+            // (title, date, body, label)
+            let parsed_line: Vec<&str> = line.split('\t').collect();
             i += 1;
+            if parsed_line.len() != 4 {
+                println!("Skippig malformed line: {}", line);
+                num_skipped += 1;
+                continue;
+            }
             if i % 100_000 == 0 {
                 println!("{}", i);
             }
-            let doc = schema.parse_document(&line)?;
+            let doc = doc!(
+                body => parsed_line[2]
+            );
             index_writer.add_document(doc).unwrap();
         }
 
@@ -52,5 +66,6 @@ fn main_inner(output_dir: &Path) -> tantivy::Result<()> {
         .expect("failed to create index writer");
     block_on(index_writer.merge(&segment_ids))?;
     block_on(index_writer.garbage_collect_files())?;
+    println!("Done. Read {i} docs, skipped {num_skipped}");
     Ok(())
 }

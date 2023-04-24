@@ -1,9 +1,9 @@
 use tantivy;
-use tantivy::query::{Query, TermQuery, QueryParser};
-use tantivy::{Term, TERMINATED, Searcher, DocSet, SegmentId, DocId, Score};
+use tantivy::query::{Query, TermQuery, QueryParser, EnableScoring};
+use tantivy::{Term, Searcher, DocSet, DocId, Score};
 use tantivy::schema::IndexRecordOption;
 use tantivy::query::Scorer;
-use futures::executor::block_on;
+
 
 // fn test_block_wand_aux(term_query: &TermQuery, searcher: &Searcher) -> tantivy::Result<()> {
 //     let term_weight = term_query.specialized_weight(&searcher, true);
@@ -47,8 +47,8 @@ use futures::executor::block_on;
 //     Ok(())
 // }
 
-fn score(query: &dyn Query, searcher: &Searcher, doc: DocId) -> tantivy::Result<Score> {
-    let weight = query.weight(&searcher, true)?;
+fn score(query: &dyn Query, searcher: &Searcher, _doc: DocId) -> tantivy::Result<Score> {
+    let weight = query.weight(EnableScoring::Enabled(&searcher))?;
     let mut scorer = weight.scorer(searcher.segment_reader(0), 1.0f32)?;
     assert_eq!(scorer.seek(537_388), 537_388);
     Ok(scorer.score())
@@ -64,7 +64,7 @@ fn main() -> tantivy::Result<()> {
     let college = TermQuery::new(Term::from_field_text(field, "college"), IndexRecordOption::WithFreqs);
 
 
-    let mut query = query_parser.parse_query("central community college")?;
+    let _query = query_parser.parse_query("central community college")?;
     let reader = index.reader()?;
     reader.reload()?;
     let searcher = reader.searcher();

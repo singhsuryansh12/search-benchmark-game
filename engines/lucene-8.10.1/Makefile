@@ -16,4 +16,4 @@ build:
 
 idx: build
 	@echo "--- Indexing Lucene 8.4.0 ---"
-	java -server -cp build/libs/search-index-benchmark-game-lucene-1.0-SNAPSHOT-all.jar BuildIndex idx < $(CORPUS)
+	java -server -cp build/libs/search-index-benchmark-game-lucene-1.0-SNAPSHOT-all.jar BuildIndex idx  < $(CORPUS)

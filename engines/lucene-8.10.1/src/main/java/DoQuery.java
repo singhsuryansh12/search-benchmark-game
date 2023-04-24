@@ -20,7 +20,7 @@ public class DoQuery {
             final IndexSearcher searcher = new IndexSearcher(reader);
             searcher.setQueryCache(null);
             try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in))) {
-                final QueryParser queryParser = new QueryParser("text", new StandardAnalyzer(CharArraySet.EMPTY_SET));
+                final QueryParser queryParser = new QueryParser("body", new StandardAnalyzer(CharArraySet.EMPTY_SET));
                 String line;
                 while ((line = bufferedReader.readLine()) != null) {
                     final String[] fields = line.trim().split("\t");
@@ -31,7 +31,6 @@ public class DoQuery {
                             .parse(query_str)
                             .rewrite(reader);
                     final int count;
-                    final TotalHitCountCollector countCollector = new TotalHitCountCollector();
                     switch (command) {
                         case "COUNT":
                             count = searcher.count(query);
@@ -40,7 +39,7 @@ public class DoQuery {
                             {
 
                                 final TopDocs topDocs = searcher.search(query, 10);
-                                count = 1;
+                                count = (int) topDocs.totalHits.value;
                             }
                             break;
                         case "TOP_10_COUNT":

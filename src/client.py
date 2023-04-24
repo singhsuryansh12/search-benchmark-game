@@ -24,12 +24,16 @@ class SearchClient:
 
     def query(self, query, command):
         query_line = "%s\t%s\n" % (command, query)
+        # print(query_line)
         self.process.stdin.write(query_line.encode("utf-8"))
         self.process.stdin.flush()
         recv = self.process.stdout.readline().strip()
         if recv == b"UNSUPPORTED":
             return None
+        elif recv == b'':
+            return 0
         cnt = int(recv)
+
         return cnt
 
     def close(self):

@@ -1,8 +1,8 @@
-import com.eclipsesource.json.Json;
-import com.eclipsesource.json.JsonObject;
 import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.document.*;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.FSDirectory;
@@ -20,26 +20,29 @@ public class BuildIndex {
         final StandardAnalyzer standardAnalyzer = new StandardAnalyzer(CharArraySet.EMPTY_SET);
         final IndexWriterConfig config = new IndexWriterConfig(standardAnalyzer);
         config.setRAMBufferSizeMB(1000);
+        int i = 0, num_skipped = 0;
         try (IndexWriter writer = new IndexWriter(FSDirectory.open(outputPath), config)) {
             try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in))) {
                 final Document document = new Document();
 
-                StoredField idField = new StoredField("id",     "");
-                TextField textField = new TextField("text", "", Field.Store.NO);
+                TextField bodyField = new TextField("body", "", Field.Store.NO);
 
-                document.add(idField);
-                document.add(textField);
+                document.add(bodyField);
 
                 String line;
                 while ((line = bufferedReader.readLine()) != null) {
                     if (line.trim().isEmpty()) {
                         continue;
                     }
-                    final JsonObject parsed_doc = Json.parse(line).asObject();
-                    final String id = parsed_doc.get("id").asString();
-                    final String text = parsed_doc.get("text").asString();
-                    idField.setStringValue(id);
-                    textField.setStringValue(text);
+                    i += 1;
+                    var parsed_line = line.split("\t");
+                    // title date body label
+                    if (parsed_line.length != 4) {
+                        System.out.println("invalid record, skipping line: " + line);
+                        num_skipped += 1;
+                        continue;
+                    }
+                    bodyField.setStringValue(parsed_line[2]);
                     writer.addDocument(document);
                 }
             }
@@ -47,6 +50,7 @@ public class BuildIndex {
             writer.commit();
             System.out.println("Merging");
             writer.forceMerge(1, true);
+            System.out.println("Done. Read " + i + " docs." + "Skipped " + num_skipped + " lines");
         }
     }
 }

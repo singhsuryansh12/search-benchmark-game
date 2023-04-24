@@ -13,7 +13,7 @@ target/release/%:
 	@echo "\n\n\n--- Building tantivy's binary ---"
 	@cargo build --release --bin $(notdir $@)
 
-idx: target/release/build_index
+idx: target/release/build_index target/release/do_query
 	@echo "\n\n\n---- Indexing tantivy ----"
 	@mkdir -p idx
-	export RUST_LOG=info && target/release/build_index "$@" < ${CORPUS}
+	export RUST_LOG=info && target/release/build_index "$@"  < $(CORPUS)

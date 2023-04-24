@@ -13,7 +13,7 @@ use std::path::Path;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    main_inner(&Path::new(&args[1])).unwrap()
+    main_inner(Path::new(&args[1])).unwrap()
 }
 
 struct Float(Score);
@@ -24,7 +24,7 @@ impl Eq for Float {}
 
 impl PartialEq for Float {
     fn eq(&self, other: &Self) -> bool {
-        self.cmp(&other) == Ordering::Equal
+        self.cmp(other) == Ordering::Equal
     }
 }
 
@@ -56,7 +56,7 @@ fn checkpoints_pruning(
             heap.pop().unwrap();
         }
         limit = heap.peek().unwrap().0;
-        return limit;
+        limit
     })?;
     Ok(checkpoints)
 }
@@ -90,13 +90,13 @@ fn checkpoints_no_pruning(
     Ok(checkpoints)
 }
 
-fn assert_nearly_equals(left: Score, right: Score) -> bool {
+fn _assert_nearly_equals(left: Score, right: Score) -> bool {
     (left - right).abs() * 2.0 / (left + right).abs() < 0.000001
 }
 
 fn main_inner(index_dir: &Path) -> tantivy::Result<()> {
     let index = Index::open_in_dir(index_dir).expect("failed to open index");
-    let text_field = index.schema().get_field("text").expect("no all field?!");
+    let text_field = index.schema().get_field("body").expect("no all field?!");
     let query_parser = QueryParser::new(
         index.schema(),
         vec![text_field],
@@ -108,7 +108,7 @@ fn main_inner(index_dir: &Path) -> tantivy::Result<()> {
     let stdin = std::io::stdin();
     for line_res in stdin.lock().lines() {
         let line = line_res?;
-        let fields: Vec<&str> = line.split("\t").collect();
+        let fields: Vec<&str> = line.split('\t').collect();
         assert_eq!(
             fields.len(),
             2,
@@ -133,8 +133,8 @@ fn main_inner(index_dir: &Path) -> tantivy::Result<()> {
             "DEBUG_TOP_10" => {
                 let weight = query.weight(tantivy::query::EnableScoring::Enabled(&searcher))?;
                 for reader in searcher.segment_readers() {
-                    let checkpoints_left = checkpoints_no_pruning(&*weight, reader, 10)?;
-                    let checkpoints_right = checkpoints_pruning(&*weight, reader, 10)?;
+                    let _checkpoints_left = checkpoints_no_pruning(&*weight, reader, 10)?;
+                    let _checkpoints_right = checkpoints_pruning(&*weight, reader, 10)?;
                 }
                 count = 0;
             }
