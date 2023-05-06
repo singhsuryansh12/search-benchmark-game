@@ -9,7 +9,7 @@ COMMANDS ?= TOP_10 COUNT
 
 # ENGINES ?= tantivy-0.13 lucene-8.4.0 pisa-0.8.2 rucene-0.1 bleve-0.8.0-scorch rucene-0.1 tantivy-0.11 tantivy-0.14 tantivy-0.15 tantivy-0.16 tantivy-0.17 tantivy-0.18 tantivy-0.19
 # ENGINES ?= tantivy-0.16 lucene-8.10.1 pisa-0.8.2 bleve-0.8.0-scorch rucene-0.1
-ENGINES ?=  tantivy-0.19 lucene-8.10.1
+ENGINES ?=  tantivy-0.19 lucene-9.5.0
 PORT ?= 12345
 QUERY_FILE ?= queries/basic_queries.jsonl
 

@@ -22,6 +22,16 @@ BooleanQuery
 PhraseQuery (with slop)
 ```
 
+## Engine details
+
+### Tantivy
+version: 0.19
+Features: All default
+
+### Lucene
+version: 9.5.0
+* Disabled query cache.
+
 
 ## Methedology
 The benchmark uses a client that simulates a closed-system, where a new query is only sent after the completion of the previous one. This is to meansure the best latency from each engine.
@@ -31,5 +41,4 @@ The workload is run against with every engine in multiple iterations, including 
 
 # TODO list
 - [ ] Use the same analyzer. By default, tantivy tries to handle some punctuations wherease Lucene doesn't.
-- [ ] Use latest version of Lucene.
 - [ ] Support result level comparison, especially for TOP_10 mode.
