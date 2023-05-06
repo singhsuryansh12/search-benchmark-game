@@ -21,7 +21,7 @@ fn main_inner(output_dir: &Path) -> tantivy::Result<()> {
     env_logger::init();
 
     let mut schema_builder = Schema::builder();
-    WhitespaceTokenizer
+    
     let body = schema_builder.add_text_field("body", TEXT);
     let schema = schema_builder.build();
 
