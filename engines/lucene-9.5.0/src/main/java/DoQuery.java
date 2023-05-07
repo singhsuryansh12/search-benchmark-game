@@ -1,10 +1,11 @@
-import org.apache.lucene.analysis.CharArraySet;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
-import org.apache.lucene.search.*;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.TopScoreDocCollector;
 import org.apache.lucene.store.FSDirectory;
 
 import java.io.BufferedReader;
@@ -20,7 +21,7 @@ public class DoQuery {
             final IndexSearcher searcher = new IndexSearcher(reader);
             searcher.setQueryCache(null);
             try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in))) {
-                final QueryParser queryParser = new QueryParser("body", new StandardAnalyzer(CharArraySet.EMPTY_SET));
+                final QueryParser queryParser = new QueryParser("body", BuildIndex.getTextAnalyzer());
                 String line;
                 while ((line = bufferedReader.readLine()) != null) {
                     final String[] fields = line.trim().split("\t");

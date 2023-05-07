@@ -1,31 +1,37 @@
 use futures::executor::block_on;
-use tantivy::tokenizer::WhitespaceTokenizer;
 use std::env;
 use std::io::BufRead;
 use std::path::Path;
-use tantivy::schema::{Schema, STORED, TEXT};
-use tantivy::{doc, Index};
+use tantivy::schema::{Schema, TEXT};
+use tantivy::{doc, IndexBuilder};
+use tantivy_bench::get_tokenizer_manager;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
     main_inner(Path::new(&args[1])).unwrap();
 }
 
-fn create_schema() -> Schema {
-    let mut schema_builder = Schema::builder();
-    schema_builder.add_text_field("body", TEXT);
-    schema_builder.build()
-}
-
 fn main_inner(output_dir: &Path) -> tantivy::Result<()> {
     env_logger::init();
 
     let mut schema_builder = Schema::builder();
-    
-    let body = schema_builder.add_text_field("body", TEXT);
+
+    let body = schema_builder.add_text_field(
+        "body",
+        TEXT.set_indexing_options(
+            TEXT.get_indexing_options()
+                .unwrap()
+                .clone()
+                .set_tokenizer("whitespace"),
+        ),
+    );
     let schema = schema_builder.build();
 
-    let index = Index::create_in_dir(output_dir, schema.clone()).expect("failed to create index");
+    let index = IndexBuilder::new()
+        .schema(schema)
+        .tokenizers(get_tokenizer_manager())
+        .create_in_dir(output_dir)
+        .expect("Failed to create index");
 
     let mut i = 0;
     let mut num_skipped = 0;

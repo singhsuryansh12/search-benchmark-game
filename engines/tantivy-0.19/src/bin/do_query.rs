@@ -1,10 +1,7 @@
-#![macro_use]
-extern crate tantivy;
-
 use tantivy::collector::{Count, TopDocs};
 use tantivy::query::{QueryParser, Weight};
-use tantivy::tokenizer::TokenizerManager;
 use tantivy::{DocId, Index, Score, SegmentReader, TERMINATED};
+use tantivy_bench::get_tokenizer_manager;
 
 use std::collections::BinaryHeap;
 use std::env;
@@ -100,7 +97,7 @@ fn main_inner(index_dir: &Path) -> tantivy::Result<()> {
     let query_parser = QueryParser::new(
         index.schema(),
         vec![text_field],
-        TokenizerManager::default(),
+        get_tokenizer_manager(),
     );
     let reader = index.reader()?;
     let searcher = reader.searcher();
@@ -116,6 +113,7 @@ fn main_inner(index_dir: &Path) -> tantivy::Result<()> {
         );
         let command = fields[0];
         let query = query_parser.parse_query(fields[1])?;
+        #[allow(clippy::needless_late_init)]
         let count;
         match command {
             "COUNT" => {
@@ -142,7 +140,7 @@ fn main_inner(index_dir: &Path) -> tantivy::Result<()> {
                 println!("UNSUPPORTED");
                 continue;
             }
-        }
+        };
         println!("{}", count);
     }
 

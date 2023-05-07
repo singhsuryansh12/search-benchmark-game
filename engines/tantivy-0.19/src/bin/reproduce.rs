@@ -1,4 +1,3 @@
-use tantivy;
 use tantivy::query::{Query, TermQuery, QueryParser, EnableScoring};
 use tantivy::{Term, Searcher, DocSet, DocId, Score};
 use tantivy::schema::IndexRecordOption;
@@ -48,7 +47,7 @@ use tantivy::query::Scorer;
 // }
 
 fn score(query: &dyn Query, searcher: &Searcher, _doc: DocId) -> tantivy::Result<Score> {
-    let weight = query.weight(EnableScoring::Enabled(&searcher))?;
+    let weight = query.weight(EnableScoring::Enabled(searcher))?;
     let mut scorer = weight.scorer(searcher.segment_reader(0), 1.0f32)?;
     assert_eq!(scorer.seek(537_388), 537_388);
     Ok(scorer.score())

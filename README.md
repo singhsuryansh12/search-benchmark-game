@@ -23,9 +23,12 @@ PhraseQuery (with slop)
 ```
 
 ## Engine details
+### Common
+* Text analysis: Both engine use a simple white-space tokenizer.
 
 ### Tantivy
 version: 0.19
+
 Features: All default
 
 ### Lucene
@@ -40,5 +43,5 @@ The workload is run against with every engine in multiple iterations, including 
 
 
 # TODO list
-- [ ] Use the same analyzer. By default, tantivy tries to handle some punctuations wherease Lucene doesn't.
 - [ ] Support result level comparison, especially for TOP_10 mode.
+- [ ] Understand why certain sloppy phrase queries return different results.

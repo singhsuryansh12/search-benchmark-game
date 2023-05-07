@@ -1,5 +1,5 @@
-import org.apache.lucene.analysis.CharArraySet;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.TextField;
@@ -17,8 +17,7 @@ public class BuildIndex {
     public static void main(String[] args) throws IOException {
         final Path outputPath = Paths.get(args[0]);
 
-        final StandardAnalyzer standardAnalyzer = new StandardAnalyzer(CharArraySet.EMPTY_SET);
-        final IndexWriterConfig config = new IndexWriterConfig(standardAnalyzer);
+        final IndexWriterConfig config = new IndexWriterConfig(getTextAnalyzer());
         config.setRAMBufferSizeMB(1000);
         int i = 0, num_skipped = 0;
         try (IndexWriter writer = new IndexWriter(FSDirectory.open(outputPath), config)) {
@@ -53,4 +52,9 @@ public class BuildIndex {
             System.out.println("Done. Read " + i + " docs." + "Skipped " + num_skipped + " lines");
         }
     }
+
+    public static Analyzer getTextAnalyzer() {
+        return  new WhitespaceAnalyzer();
+    }
+
 }
