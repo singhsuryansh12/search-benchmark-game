@@ -4,6 +4,8 @@ This repository forked from https://github.com/quickwit-oss/search-benchmark-gam
 
 This repo aims to achieve a close comparison between Tantivy with Lucene, notably it tires to use the same search workload from [luceneutil](https://github.com/mikemccand/luceneutil).
 
+The latest result can be found [here](https://tony-x.github.io/search-benchmark-game/).
+
 
 # The benchmark
 ## Workload
