@@ -1,5 +1,5 @@
-CORPUS := $(shell pwd)/dev-corpus/20k-enwiki-20120502-lines-1k-fixed-utf8-with-random-label.txt
-# CORPUS := "/local/home/tonyx/wss/luceneutil/data/enwiki-20120502-lines-1k-fixed-utf8-with-random-label.txt"
+# CORPUS := $(shell pwd)/dev-corpus/20k-enwiki-20120502-lines-1k-fixed-utf8-with-random-label.txt
+CORPUS := "/local/home/tonyx/wss/luceneutil/data/enwiki-20120502-lines-1k-fixed-utf8-with-random-label.txt"
 export
 
 WIKI_SRC = "https://www.dropbox.com/s/wwnfnu441w1ec9p/wiki-articles.json.bz2"
@@ -44,4 +44,4 @@ compile:
 serve:
 	@echo "--- Serving results ---"
 	@cp results.json web/build/results.json
-	@cd web/build && python3 -m http.server $(PORT)
+	@cd web/build && python3 -m http.server $(PORT) --bind localhost
