@@ -222,7 +222,7 @@ class Benchmark extends React.Component {
 }
 
 $(function () {
-  $.getJSON(process.env.PUBLIC_URL + "./results.json", (data) => {
+  $.getJSON(process.env.PUBLIC_URL + "/results.json", (data) => {
     var modes = [];
     var engines = [];
     var tags_set = new Set();
