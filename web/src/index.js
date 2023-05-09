@@ -48,7 +48,7 @@ class Benchmark extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      mode: "TOP_10",
+      mode: "COUNT",
       tag: null
     };
   }
@@ -68,7 +68,7 @@ class Benchmark extends React.Component {
 
   filterQueries(queries) {
     let tag = this.state.tag;
-    if (tag !== undefined) {
+    if (tag != undefined) {
       return queries.filter(query => query.tags.indexOf(tag) >= 0);
     } else {
       return queries;
@@ -150,7 +150,7 @@ class Benchmark extends React.Component {
       <form>
         <fieldset>
           <label htmlFor="collectionField">Collection type</label>
-          <select id="collectionField" onChange={evt => this.handleChangeMode(evt)}>
+          <select id="collectionField" value={this.state.mode} onChange={evt => this.handleChangeMode(evt)}>
             {this.props.modes.map((mode) => <option value={mode} key={mode}>{mode}</option>)}
           </select>
           <label htmlFor="queryTagField">Type of Query</label>
@@ -222,7 +222,7 @@ class Benchmark extends React.Component {
 }
 
 $(function () {
-  $.getJSON(process.env.PUBLIC_URL + "results.json", (data) => {
+  $.getJSON(process.env.PUBLIC_URL + "/results.json", (data) => {
     var modes = [];
     var engines = [];
     var tags_set = new Set();
