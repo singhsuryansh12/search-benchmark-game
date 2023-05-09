@@ -138,9 +138,10 @@ class Benchmark extends React.Component {
         // Only useful if at least one engine supports this query 
         query_data[min_engine].className = "fastest";
         query_data[max_engine].className = "slowest";
+        query_data.min_max_diff = max_microsecs / min_microsecs
       }
     }
-    return { engines, queries };
+     return { engines, queries };
   }
 
   render() {
@@ -189,7 +190,9 @@ class Benchmark extends React.Component {
             }
           </tr>
           {
-            Object.entries(data_view.queries).map(kv => {
+             Object.entries(data_view.queries)
+             .sort((a, b) => b[1].min_max_diff - a[1].min_max_diff )
+             .map(kv => {
               var query = kv[0];
               var engine_queries = kv[1];
               return <tr>
@@ -219,7 +222,7 @@ class Benchmark extends React.Component {
 }
 
 $(function () {
-  $.getJSON(process.env.PUBLIC_URL + "/results.json", (data) => {
+  $.getJSON(process.env.PUBLIC_URL + "results.json", (data) => {
     var modes = [];
     var engines = [];
     var tags_set = new Set();
