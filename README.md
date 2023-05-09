@@ -27,18 +27,23 @@ PhraseQuery (with slop)
 ## Engine details
 ### Common
 * Text analysis: Both engine use a simple whitespace tokenizer.
+* Both indices are force merged down to a single segment
+* A single search thread executes each task TK times, discards the first TK (warmup), and records the minimum time of the remaining 8.
+* The search thread is a simple Rust client, spwaning a sub-process running either Tantivy or Lucene and communicating over a local Unix pipe
 
 ### Tantivy
-version: 0.19
+* Version: 0.19
+* Rust version: ???
 
 Features: All default
 
 ### Lucene
-version: 9.5.0
+* Version: 9.5.0
+* JDK version/flags: ???
 * Disabled query cache.
 
 
-## Methedology
+## Methodology
 The benchmark uses a client that simulates a closed-loop system, where a new query is sent only after the completion of the previous one. This is to measure the lowest latency from each engine.
 
 The workload is run against both engines in multiple iterations, including a warmup run at the beginning.
