@@ -20,4 +20,4 @@ engines/**/build
 **/flamegraph.svg
 wiki-articles.json.bz2
 wiki-articles.json
-corpus.json
+dev-corpus/enwiki-20120502-lines-1k-fixed-utf8-with-random-label.txt
