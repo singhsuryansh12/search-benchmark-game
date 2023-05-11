@@ -1,19 +1,22 @@
+export CORPUS
+
 clean:
-	rm -fr idx
-	rm -fr target
+	@rm -fr idx
+	@rm -fr target
 
-compile: target/release/build_index target/release/do_query
+clean-index:
+	@rm -fr idx
 
-index: idx
+index: binaries
+	@echo "--- Indexing tantivy ----"
+	@mkdir -p idx
+	export RUST_LOG=info && target/release/build_index idx < $(CORPUS)
 
 serve: target/release/do_query
 	@target/release/do_query idx
 
 target/release/%:
-	@echo "\n\n\n--- Building tantivy's binary ---"
+	@echo "--- Building tantivy's binary ---"
 	@cargo build --release --bin $(notdir $@)
 
-idx: target/release/build_index target/release/do_query
-	@echo "\n\n\n---- Indexing tantivy ----"
-	@mkdir -p idx
-	export RUST_LOG=info && target/release/build_index "$@"  < $(CORPUS)
+binaries: target/release/build_index target/release/do_query

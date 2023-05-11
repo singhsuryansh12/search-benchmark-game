@@ -1,8 +1,13 @@
+export CORPUS
+
 NAME ?= "Lucene 9.5.0"
 clean:
 	@echo "--- Cleaning $(NAME) ---"
 	@rm -fr idx
 	@rm -fr build
+
+clean-index:
+	@rm -fr idx
 
 compile: build
 

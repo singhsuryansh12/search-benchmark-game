@@ -1,15 +1,18 @@
-# CORPUS := $(shell pwd)/dev-corpus/20k-enwiki-20120502-lines-1k-fixed-utf8-with-random-label.txt
-CORPUS := "$(shell pwd)/dev-corpus/enwiki-20120502-lines-1k-fixed-utf8-with-random-label.txt"
-export
+DEV_CORPUS := $(shell pwd)/corpus/20k-enwiki-20120502-lines-1k-fixed-utf8-with-random-label.txt
+REAL_CORPUS := "$(shell pwd)/corpus/enwiki-20120502-lines-1k-fixed-utf8-with-random-label.txt"
 
 WIKI_SRC = "http://home.apache.org/~mikemccand/enwiki-20120502-lines-1k-fixed-utf8-with-random-label.txt.lzma"
 
+export
 # COMMANDS ?=  TOP_10 TOP_10_COUNT COUNT
 COMMANDS ?= TOP_10 COUNT
-
-ENGINES ?=  tantivy-0.19 lucene-9.5.0
-PORT ?= 12345
+ENGINES ?= tantivy-0.19 lucene-9.5.0
 QUERY_FILE ?= queries/basic_queries.jsonl
+
+WARMUP_ITER ?= 1
+NUM_ITER ?= 10
+
+PORT ?= 12345
 
 help:
 	@grep '^[^#[:space:]].*:' Makefile
@@ -25,9 +28,20 @@ clean:
 	@rm -fr results
 	@for engine in $(ENGINES); do cd ${shell pwd}/engines/$$engine && make clean ; done
 
+clean-index:
+	@echo "--- Cleaning indices only ---"
+	@for engine in $(ENGINES); do cd ${shell pwd}/engines/$$engine && make clean-index ; done
+
+
 index:
-	@echo "--- Indexing corpus ---"
-	@for engine in $(ENGINES); do cd ${shell pwd}/engines/$$engine && make index ; done
+	@echo "--- Indexing real corpus ---"
+	@export CORPUS=$(REAL_CORPUS)
+	@for engine in $(ENGINES); do cd ${shell pwd}/engines/$$engine && make CORPUS=$(REAL_CORPUS) index ; done
+
+dev-index:
+	@echo "--- Indexing dev corpus ---"
+	@echo "$(DEV_CORPUS)"
+	@for engine in $(ENGINES); do cd ${shell pwd}/engines/$$engine && make CORPUS=$(DEV_CORPUS) index ; done
 
 bench:
 	@echo "--- Benchmarking ---"

@@ -2,9 +2,12 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.document.LongField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.search.Sort;
+import org.apache.lucene.search.SortField;
 import org.apache.lucene.store.FSDirectory;
 
 import java.io.BufferedReader;
@@ -18,6 +21,7 @@ public class BuildIndex {
         final Path outputPath = Paths.get(args[0]);
 
         final IndexWriterConfig config = new IndexWriterConfig(getTextAnalyzer());
+        config.setIndexSort(new Sort(new SortField("id", SortField.Type.LONG)));
         config.setRAMBufferSizeMB(1000);
         int i = 0, num_skipped = 0;
         try (IndexWriter writer = new IndexWriter(FSDirectory.open(outputPath), config)) {
@@ -25,6 +29,7 @@ public class BuildIndex {
                 final Document document = new Document();
 
                 TextField bodyField = new TextField("body", "", Field.Store.NO);
+                LongField idField = new LongField("id", 0);
 
                 document.add(bodyField);
 
@@ -33,7 +38,6 @@ public class BuildIndex {
                     if (line.trim().isEmpty()) {
                         continue;
                     }
-                    i += 1;
                     var parsed_line = line.split("\t");
                     // title date body label
                     if (parsed_line.length != 4) {
@@ -41,7 +45,12 @@ public class BuildIndex {
                         num_skipped += 1;
                         continue;
                     }
+                    i += 1;
+                    if (i % 100000 == 0) {
+                        System.out.println(i);
+                    }
                     bodyField.setStringValue(parsed_line[2]);
+                    idField.setLongValue(i);
                     writer.addDocument(document);
                 }
             }

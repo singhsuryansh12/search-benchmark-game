@@ -2,8 +2,8 @@ use futures::executor::block_on;
 use std::env;
 use std::io::BufRead;
 use std::path::Path;
-use tantivy::schema::{Schema, TEXT};
-use tantivy::{doc, IndexBuilder};
+use tantivy::schema::{Cardinality, NumericOptions, Schema, TEXT};
+use tantivy::{doc, IndexBuilder, IndexSettings, IndexSortByField, Order};
 use tantivy_bench::get_tokenizer_manager;
 
 fn main() {
@@ -25,11 +25,24 @@ fn main_inner(output_dir: &Path) -> tantivy::Result<()> {
                 .set_tokenizer("whitespace"),
         ),
     );
+    let id_field = schema_builder.add_u64_field(
+        "id",
+        NumericOptions::default()
+            .set_indexed()
+            .set_fast(Cardinality::SingleValue),
+    );
     let schema = schema_builder.build();
 
     let index = IndexBuilder::new()
         .schema(schema)
         .tokenizers(get_tokenizer_manager())
+        .settings(IndexSettings {
+            sort_by_field: Some(IndexSortByField {
+                order: Order::Asc,
+                field: "id".into(),
+            }),
+            ..IndexSettings::default()
+        })
         .create_in_dir(output_dir)
         .expect("Failed to create index");
 
@@ -48,16 +61,17 @@ fn main_inner(output_dir: &Path) -> tantivy::Result<()> {
             }
             // (title, date, body, label)
             let parsed_line: Vec<&str> = line.split('\t').collect();
-            i += 1;
             if parsed_line.len() != 4 {
                 println!("Skippig malformed line: {}", line);
                 num_skipped += 1;
                 continue;
             }
+            i += 1;
             if i % 100_000 == 0 {
                 println!("{}", i);
             }
             let doc = doc!(
+                id_field => i as u64,
                 body => parsed_line[2]
             );
             index_writer.add_document(doc).unwrap();
