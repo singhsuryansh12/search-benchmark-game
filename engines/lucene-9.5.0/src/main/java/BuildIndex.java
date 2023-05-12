@@ -7,7 +7,7 @@ import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.search.Sort;
-import org.apache.lucene.search.SortField;
+import org.apache.lucene.search.SortedNumericSelector;
 import org.apache.lucene.store.FSDirectory;
 
 import java.io.BufferedReader;
@@ -19,9 +19,10 @@ import java.nio.file.Paths;
 public class BuildIndex {
     public static void main(String[] args) throws IOException {
         final Path outputPath = Paths.get(args[0]);
+        final int index_delete_pct = Integer.valueOf(args[1]);
 
         final IndexWriterConfig config = new IndexWriterConfig(getTextAnalyzer());
-        config.setIndexSort(new Sort(new SortField("id", SortField.Type.LONG)));
+        config.setIndexSort(new Sort(LongField.newSortField("id", false, SortedNumericSelector.Type.MIN)));
         config.setRAMBufferSizeMB(1000);
         int i = 0, num_skipped = 0;
         try (IndexWriter writer = new IndexWriter(FSDirectory.open(outputPath), config)) {
@@ -32,6 +33,7 @@ public class BuildIndex {
                 LongField idField = new LongField("id", 0);
 
                 document.add(bodyField);
+                document.add(idField);
 
                 String line;
                 while ((line = bufferedReader.readLine()) != null) {
@@ -58,7 +60,20 @@ public class BuildIndex {
             writer.commit();
             System.out.println("Merging");
             writer.forceMerge(1, true);
-            System.out.println("Done. Read " + i + " docs." + "Skipped " + num_skipped + " lines");
+
+            // Apply deletes
+            int num_deleted = 0;
+            for (int j = 1; j <= i; j++) {
+                if (j % 100 < index_delete_pct) {
+                    writer.deleteDocuments(LongField.newExactQuery("id", j));
+                    num_deleted++;
+                }
+            }
+            writer.commit();
+            System.out.println("Done. Read " + i + " docs." + "Skipped " + num_skipped +
+                    " lines. deleted " + num_deleted);
+
+
         }
     }
 

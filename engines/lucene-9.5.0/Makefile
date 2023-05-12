@@ -21,5 +21,5 @@ build:
 	@gradle clean shadowJar
 
 idx: build
-	@echo "--- Indexing $(NAME) ---"
-	java -server -cp build/libs/search-index-benchmark-game-lucene-1.0-SNAPSHOT-all.jar BuildIndex idx  < $(CORPUS)
+	@echo "--- Indexing $(NAME) with %$(INDEX_DELETE_PCT) deletes ---"
+	java -server -cp build/libs/search-index-benchmark-game-lucene-1.0-SNAPSHOT-all.jar BuildIndex idx $(INDEX_DELETE_PCT) < $(CORPUS)

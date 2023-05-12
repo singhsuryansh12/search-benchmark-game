@@ -4,14 +4,20 @@ REAL_CORPUS := "$(shell pwd)/corpus/enwiki-20120502-lines-1k-fixed-utf8-with-ran
 WIKI_SRC = "http://home.apache.org/~mikemccand/enwiki-20120502-lines-1k-fixed-utf8-with-random-label.txt.lzma"
 
 export
-# COMMANDS ?=  TOP_10 TOP_10_COUNT COUNT
+
+# What to bench?
 COMMANDS ?= TOP_10 COUNT
 ENGINES ?= tantivy-0.19 lucene-9.5.0
 QUERY_FILE ?= queries/basic_queries.jsonl
 
+# Index settings
+INDEX_DELETE_PCT ?= 2
+
+# Benchmark client settings
 WARMUP_ITER ?= 1
 NUM_ITER ?= 10
 
+# Serving options
 PORT ?= 12345
 
 help:

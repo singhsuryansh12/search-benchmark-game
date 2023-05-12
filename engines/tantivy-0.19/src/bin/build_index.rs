@@ -3,16 +3,16 @@ use std::env;
 use std::io::BufRead;
 use std::path::Path;
 use tantivy::schema::{Cardinality, NumericOptions, Schema, TEXT};
-use tantivy::{doc, IndexBuilder, IndexSettings, IndexSortByField, Order};
+use tantivy::{doc, IndexBuilder, IndexSettings, IndexSortByField, Order, Term};
 use tantivy_bench::get_tokenizer_manager;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    main_inner(Path::new(&args[1])).unwrap();
+    main_inner(Path::new(&args[1]), i32::from_str_radix(&args[2], 10).unwrap()).unwrap();
 }
 
-fn main_inner(output_dir: &Path) -> tantivy::Result<()> {
-    env_logger::init();
+fn main_inner(output_dir: &Path, index_delete_pct: i32) -> tantivy::Result<()> {
+    println!("Build index at `{}` with delete_pct {}%", output_dir.display(), index_delete_pct);
 
     let mut schema_builder = Schema::builder();
 
@@ -85,7 +85,19 @@ fn main_inner(output_dir: &Path) -> tantivy::Result<()> {
         .writer(1_500_000_000)
         .expect("failed to create index writer");
     block_on(index_writer.merge(&segment_ids))?;
+
+    // Apply deletes
+    let total_indexed = i;
+    let mut num_deleted = 0;
+    for i in 1..=total_indexed {
+        if i % 100 < index_delete_pct {
+            index_writer.delete_term(Term::from_field_u64(id_field, i as u64));
+            num_deleted += 1;
+        }
+    }
+    index_writer.commit()?;
+
     block_on(index_writer.garbage_collect_files())?;
-    println!("Done. Read {i} docs, skipped {num_skipped}");
+    println!("Done. Read {i} docs, skipped {num_skipped}, deleted {num_deleted}");
     Ok(())
 }

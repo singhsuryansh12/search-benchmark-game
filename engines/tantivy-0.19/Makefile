@@ -1,3 +1,4 @@
+NAME := "tantivy 0.19"
 export CORPUS
 
 clean:
@@ -8,9 +9,9 @@ clean-index:
 	@rm -fr idx
 
 index: binaries
-	@echo "--- Indexing tantivy ----"
+	@echo "--- Indexing $(NAME) with $(INDEX_DELETE_PCT)% deletes ---"
 	@mkdir -p idx
-	export RUST_LOG=info && target/release/build_index idx < $(CORPUS)
+	@target/release/build_index idx $(INDEX_DELETE_PCT) < $(CORPUS)
 
 serve: target/release/do_query
 	@target/release/do_query idx
