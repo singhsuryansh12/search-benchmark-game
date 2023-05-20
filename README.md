@@ -6,6 +6,7 @@ It aims to achieve a close comparison between Tantivy and Lucene using the same 
 
 The latest results can be found [here](https://tony-x.github.io/search-benchmark-game/).
 
+Want to run the benchmark yourself or make changes? here is the [development guide](#development-guide) 
 
 # The benchmark
 ## Workload
@@ -47,3 +48,26 @@ Features: All default
 The benchmark uses a client that simulates a closed-loop system, where a new query is sent only after the completion of the previous one. This is to measure the lowest latency from each engine.
 
 The workload is run against both engines in multiple iterations, including a warmup run at the beginning.
+
+# Development Guide
+## Tooling
+* `make` is used to manage tasks.
+* You need rust. The recommended way to install it via [rustup](https://www.rust-lang.org/tools/install)
+* JDK 17+. The are plenty of ways to install it.
+* Gardle - 8.1 and up 
+
+## Quick verification
+```
+make clean
+
+# build the engines, also make indices using the dev corpus
+# the dev corpus is a down-sampled version of the larger corpus
+# this is useful for fast development/iteartion
+make dev-index  
+
+# run the benchmark
+make bench
+
+# serve the results
+make serve
+```
