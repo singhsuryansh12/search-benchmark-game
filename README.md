@@ -6,7 +6,7 @@ It aims to achieve a close comparison between Tantivy and Lucene using the same 
 
 The latest results can be found [here](https://tony-x.github.io/search-benchmark-game/).
 
-Want to run the benchmark yourself or make changes? here is the [development guide](#development-guide) 
+Want to run the benchmark or make changes? here is the [development guide](#development-guide) 
 
 # The benchmark
 ## Workload
@@ -54,7 +54,7 @@ The workload is run against both engines in multiple iterations, including a war
 * `make` is used to manage tasks.
 * You need rust. The recommended way to install it via [rustup](https://www.rust-lang.org/tools/install)
 * JDK 17+. The are plenty of ways to install it.
-* Gardle - 8.1 and up 
+* Gardle - 8.1 or up.
 
 ## Quick verification
 ```
@@ -71,3 +71,21 @@ make bench
 # serve the results
 make serve
 ```
+
+## Bench with the full index
+```
+# This downloads the 33M entries of wiki text
+make corpus
+
+make index
+make bench
+make serve
+
+# Note: make can take one liner like this
+make index bench serve
+```
+
+## About the results...
+This repo is still work-in-progress of building the trust of the results. It tries to make an apple-to-apple comparison as much as possible. 
+
+It is totally possible that your run of the benchmark turns out to be much different that mine. Make sure you take into account of your hardware environment when interpreting the results.
