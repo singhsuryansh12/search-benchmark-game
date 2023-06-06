@@ -41,6 +41,7 @@ fn main_inner(output_dir: &Path, index_delete_pct: i32) -> tantivy::Result<()> {
                 order: Order::Asc,
                 field: "id".into(),
             }),
+	    docstore_compress_dedicated_thread: false,
             ..IndexSettings::default()
         })
         .create_in_dir(output_dir)

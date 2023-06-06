@@ -32,8 +32,7 @@ public class DoQuery {
                     }
                     final String query_str = fields[1];
                     Query query = queryParser
-                            .parse(query_str)
-                            .rewrite(reader);
+                              .parse(query_str);
                     switch (command) {
                         case "COUNT":
                         {
@@ -75,6 +74,8 @@ public class DoQuery {
                             System.out.println("UNSUPPORTED");
                             break;
                     }
+                    // #14: paranoia
+                    System.out.flush();
                 }
             }
         }

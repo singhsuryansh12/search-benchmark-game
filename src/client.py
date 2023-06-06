@@ -24,7 +24,10 @@ class SearchClient:
         self.process = subprocess.Popen(["make", "--no-print-directory", "serve"],
             cwd=cwd,
             stdout=subprocess.PIPE,
-            stdin=subprocess.PIPE)
+            stderr=subprocess.PIPE,
+            stdin=subprocess.PIPE,
+            bufsize=0, # no buffering
+            )
 
     def query(self, query, command):
         query_line = "%s\t%s\n" % (command, query)

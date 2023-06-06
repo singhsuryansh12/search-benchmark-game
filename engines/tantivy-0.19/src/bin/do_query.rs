@@ -5,8 +5,9 @@ use tantivy_bench::get_tokenizer_manager;
 
 use std::collections::BinaryHeap;
 use std::env;
-use std::io::BufRead;
 use std::path::Path;
+use std::io::BufRead;
+use std::io::Write;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -99,6 +100,7 @@ fn main_inner(index_dir: &Path) -> tantivy::Result<()> {
     let searcher = reader.searcher();
 
     let stdin = std::io::stdin();
+    let mut stdout = std::io::stdout();
     for line_res in stdin.lock().lines() {
         let line = line_res?;
         let fields: Vec<&str> = line.split('\t').collect();
@@ -149,9 +151,12 @@ fn main_inner(index_dir: &Path) -> tantivy::Result<()> {
             }
             _ => {
                 println!("UNSUPPORTED");
-                continue;
             }
         };
+
+	// TODO: is this correct???
+	// #14: paranoia
+        stdout.flush()?;
     }
 
     Ok(())
