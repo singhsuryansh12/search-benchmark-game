@@ -56,6 +56,10 @@ bench:
 	@mkdir results
 	@python3 src/client.py $(QUERY_FILE) $(ENGINES)
 
+overlap_100:
+	@echo "--- Running Overalp Test (compare top 100) ---"
+	@python3 src/overlap.py "queries/basic_queries_no_sloppy_phrase.jsonl" $(ENGINES)
+
 compile:
 	@echo "--- Compiling binaries ---"
 	@for engine in $(ENGINES); do cd ${shell pwd}/engines/$$engine && make compile ; done

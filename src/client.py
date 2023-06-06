@@ -29,12 +29,18 @@ class SearchClient:
             bufsize=0, # no buffering
             )
 
+    def run_command(self, command):
+        self.process.stdin.write(command.encode("utf-8"))
+        self.process.stdin.flush()
+        return self.process.stdout.readline().strip()
+
+
     def query(self, query, command):
         query_line = "%s\t%s\n" % (command, query)
-        # print(query_line)
-        self.process.stdin.write(query_line.encode("utf-8"))
-        self.process.stdin.flush()
-        recv = self.process.stdout.readline().strip()
+        return self.run_command(query_line)
+
+    def get_count(self, query, command):
+        recv = self.query(query, command)
         if recv == b"UNSUPPORTED":
             return None
         elif recv == b'':
@@ -50,7 +56,7 @@ class SearchClient:
 def drive(queries, client, command):
     for query in queries:
         start = time.monotonic()
-        count = client.query(query.query, command)
+        count = client.get_count(query.query, command)
         stop = time.monotonic()
         duration = int((stop - start) * 1e6)
         yield (query, count, duration)
