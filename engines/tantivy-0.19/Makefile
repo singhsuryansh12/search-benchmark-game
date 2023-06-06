@@ -16,8 +16,6 @@ index: binaries
 serve: target/release/do_query
 	@target/release/do_query idx
 
-target/release/%:
+target/release/%: src/bin/%.rs src/lib.rs
 	@echo "--- Building tantivy's binary ---"
 	@cargo build --release --bin $(notdir $@)
-
-binaries: target/release/build_index target/release/do_query

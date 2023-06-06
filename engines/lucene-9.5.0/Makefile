@@ -16,7 +16,7 @@ serve:
 
 index: idx
 
-build:
+build: src/main/java/*.java
 	@echo "--- Building $(NAME) ---"
 	@gradle clean shadowJar
 

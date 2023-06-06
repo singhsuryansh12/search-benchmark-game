@@ -94,11 +94,7 @@ fn _assert_nearly_equals(left: Score, right: Score) -> bool {
 fn main_inner(index_dir: &Path) -> tantivy::Result<()> {
     let index = Index::open_in_dir(index_dir).expect("failed to open index");
     let text_field = index.schema().get_field("body").expect("no all field?!");
-    let query_parser = QueryParser::new(
-        index.schema(),
-        vec![text_field],
-        get_tokenizer_manager(),
-    );
+    let query_parser = QueryParser::new(index.schema(), vec![text_field], get_tokenizer_manager());
     let reader = index.reader()?;
     let searcher = reader.searcher();
 
@@ -106,27 +102,42 @@ fn main_inner(index_dir: &Path) -> tantivy::Result<()> {
     for line_res in stdin.lock().lines() {
         let line = line_res?;
         let fields: Vec<&str> = line.split('\t').collect();
-        assert_eq!(
-            fields.len(),
-            2,
-            "Expected a line in the format <COMMAND> query."
-        );
+
         let command = fields[0];
+        if command != "TOP_N_DOCS" {
+            assert_eq!(
+                fields.len(),
+                2,
+                "Expected a line in the format <COMMAND> query."
+            );
+        }
         let query = query_parser.parse_query(fields[1])?;
-        #[allow(clippy::needless_late_init)]
-        let count;
         match command {
             "COUNT" => {
-                count = query.count(&searcher)?;
+                let count = query.count(&searcher)?;
+                println!("{}", count);
             }
             "TOP_10" => {
                 let _top_k = searcher.search(&query, &TopDocs::with_limit(10))?;
-                count = 1;
+                println!("{}", _top_k.len());
             }
             "TOP_10_COUNT" => {
-                let (_top_k, count_) =
-                    searcher.search(&query, &(TopDocs::with_limit(10), Count))?;
-                count = count_;
+                let (_top_k, count) = searcher.search(&query, &(TopDocs::with_limit(10), Count))?;
+                println!("{}", count);
+            }
+            "TOP_N_DOCS" => {
+                assert_eq!(
+                    fields.len(),
+                    3,
+                    "Expect TOP_N_DOCS command to take <QUERY> <TOP_N>"
+                );
+                let n: usize = fields[2].parse().unwrap();
+                let top_docs = searcher.search(&query, &TopDocs::with_limit(n))?;
+                let doc_ids: Vec<String> = top_docs
+                    .into_iter()
+                    .map(|x| x.1.doc_id.to_string())
+                    .collect();
+                println!("{} {}", doc_ids.len(), doc_ids.join(" "));
             }
             "DEBUG_TOP_10" => {
                 let weight = query.weight(tantivy::query::EnableScoring::Enabled(&searcher))?;
@@ -134,14 +145,13 @@ fn main_inner(index_dir: &Path) -> tantivy::Result<()> {
                     let _checkpoints_left = checkpoints_no_pruning(&*weight, reader, 10)?;
                     let _checkpoints_right = checkpoints_pruning(&*weight, reader, 10)?;
                 }
-                count = 0;
+                println!("0");
             }
             _ => {
                 println!("UNSUPPORTED");
                 continue;
             }
         };
-        println!("{}", count);
     }
 
     Ok(())
