@@ -113,4 +113,4 @@ if __name__ == "__main__":
         print(results_commands.keys())
         results[command] = results_commands
     with open("results.json" , "w") as f:
-        json.dump(results, f, default=lambda obj: obj.__dict__)
+        json.dump(results, f, indent=2, default=lambda obj: obj.__dict__)
