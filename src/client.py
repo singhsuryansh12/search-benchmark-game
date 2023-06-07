@@ -47,7 +47,7 @@ class SearchClient:
         if len(tup) != 2:
             raise RuntimeError(f'malformed response "{recv}"')
         elapsed_nanos, result = tup
-        elapsed_micros = int(elapsed_nanos) / 1000.
+        elapsed_micros = int(int(elapsed_nanos) / 1000.)
         if result == "UNSUPPORTED":
             return elapsed_micros, None
         elif result == '':
