@@ -8,6 +8,7 @@ use std::env;
 use std::path::Path;
 use std::io::BufRead;
 use std::io::Write;
+use std::time::Instant;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -114,18 +115,18 @@ fn main_inner(index_dir: &Path) -> tantivy::Result<()> {
             );
         }
         let query = query_parser.parse_query(fields[1])?;
-        match command {
+	let t0 = Instant::now();
+	let result : String = match command {
             "COUNT" => {
-                let count = query.count(&searcher)?;
-                println!("{}", count);
+                query.count(&searcher)?.to_string()
             }
             "TOP_10" => {
-                let _top_k = searcher.search(&query, &TopDocs::with_limit(10))?;
-                println!("{}", _top_k.len());
+                let _top_docs = searcher.search(&query, &TopDocs::with_limit(10))?;
+		_top_docs.len().to_string()
             }
             "TOP_10_COUNT" => {
-                let (_top_k, count) = searcher.search(&query, &(TopDocs::with_limit(10), Count))?;
-                println!("{}", count);
+                let (_top_docs, count) = searcher.search(&query, &(TopDocs::with_limit(10), Count))?;
+		count.to_string()
             }
             "TOP_N_DOCS" => {
                 assert_eq!(
@@ -134,12 +135,12 @@ fn main_inner(index_dir: &Path) -> tantivy::Result<()> {
                     "Expect TOP_N_DOCS command to take <QUERY> <TOP_N>"
                 );
                 let n: usize = fields[2].parse().unwrap();
-                let top_docs = searcher.search(&query, &TopDocs::with_limit(n))?;
+                let (top_docs, _count) = searcher.search(&query, &(TopDocs::with_limit(n), Count))?;
                 let doc_ids: Vec<String> = top_docs
                     .into_iter()
                     .map(|x| x.1.doc_id.to_string())
                     .collect();
-                println!("{} {}", doc_ids.len(), doc_ids.join(" "));
+                doc_ids.len().to_string() + " " + &doc_ids.join(" ").to_string()
             }
             "DEBUG_TOP_10" => {
                 let weight = query.weight(tantivy::query::EnableScoring::Enabled(&searcher))?;
@@ -147,13 +148,17 @@ fn main_inner(index_dir: &Path) -> tantivy::Result<()> {
                     let _checkpoints_left = checkpoints_no_pruning(&*weight, reader, 10)?;
                     let _checkpoints_right = checkpoints_pruning(&*weight, reader, 10)?;
                 }
-                println!("0");
+		// TODO: this is weird
+		"0".to_string()
             }
             _ => {
-                println!("UNSUPPORTED");
+		// TODO: this is weird
+	        "UNSUPPORTED".to_string()
             }
         };
 
+	let t1 = Instant::now();
+	println!("{} {}", (t1 - t0).as_nanos(), result);
 	// TODO: is this correct???
 	// #14: paranoia
         stdout.flush()?;

@@ -32,22 +32,30 @@ class SearchClient:
     def run_command(self, command):
         self.process.stdin.write(command.encode("utf-8"))
         self.process.stdin.flush()
-        return self.process.stdout.readline().strip()
-
+        return self.process.stdout.readline().strip().decode("utf-8")
 
     def query(self, query, command):
         query_line = "%s\t%s\n" % (command, query)
         return self.run_command(query_line)
 
     def get_count(self, query, command):
-        recv = self.query(query, command)
-        if recv == b"UNSUPPORTED":
-            return None
-        elif recv == b'':
-            return 0
-        cnt = int(recv)
+        # print(query_line)
+        query_line = "%s\t%s\n" % (command, query)
+        recv = self.run_command(query_line)
+        # print('  recv: ' + recv)
+        tup = recv.split(' ', 1)
+        if len(tup) != 2:
+            raise RuntimeError(f'malformed response "{recv}"')
+        elapsed_nanos, result = tup
+        elapsed_micros = int(elapsed_nanos) / 1000.
+        if result == "UNSUPPORTED":
+            return elapsed_micros, None
+        elif result == '':
+            return elapsed_micros, 0
 
-        return cnt
+        cnt = int(result)
+
+        return elapsed_micros, cnt
 
     def close(self):
         self.process.stdin.close()
@@ -55,11 +63,8 @@ class SearchClient:
 
 def drive(queries, client, command):
     for query in queries:
-        start = time.monotonic()
-        count = client.get_count(query.query, command)
-        stop = time.monotonic()
-        duration = int((stop - start) * 1e6)
-        yield (query, count, duration)
+        elapsed_nanos, count = client.get_count(query.query, command)
+        yield (query, count, elapsed_nanos)
 
 class Query(object):
     def __init__(self, query, tags):

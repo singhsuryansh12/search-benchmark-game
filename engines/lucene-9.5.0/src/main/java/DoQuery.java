@@ -33,32 +33,36 @@ public class DoQuery {
                     final String query_str = fields[1];
                     Query query = queryParser
                               .parse(query_str);
+                    String result;
+                    long t0 = System.nanoTime();
                     switch (command) {
                         case "COUNT":
                         {
                             int count = searcher.count(query);
-                            System.out.println(count);
+                            result = Integer.toString(count);
                         }
                             break;
                         case "TOP_10":
                         {
                             final TopDocs topDocs = searcher.search(query, 10);
                             int count = (int) topDocs.totalHits.value;
-                            System.out.println(count);
+                            result = Integer.toString(count);
                         }
                             break;
                         case "TOP_10_COUNT":
                         {
+                            // NOTE: this disables BMW (by passing 2nd argument Integer.MAX_VALUE
                             final TopScoreDocCollector topScoreDocCollector = TopScoreDocCollector.create(10, Integer.MAX_VALUE);
                             searcher.search(query, topScoreDocCollector);
                             int count = topScoreDocCollector.getTotalHits();
-                            System.out.println(count);
+                            result = Integer.toString(count);
                         }
                             break;
                         case "TOP_N_DOCS":
                         {
                             assert fields.length == 3;
                             int n = Integer.parseInt(fields[2]);
+                            // TODO: why not just the IS.search method?
                             final TopScoreDocCollector topScoreDocCollector = TopScoreDocCollector.create(n, n);
                             searcher.search(query, topScoreDocCollector);
                             StringBuilder sb = new StringBuilder();
@@ -67,14 +71,16 @@ public class DoQuery {
                             for (var scoreDoc : docs) {
                                 sb.append(" ").append(scoreDoc.doc);
                             }
-                            System.out.println(sb);
+                            result = sb.toString();
                         }
                             break;
                         default:
-                            System.out.println("UNSUPPORTED");
+                            result = "UNSUPPORTED";
                             break;
                     }
                     // #14: paranoia
+                    long t1 = System.nanoTime();
+                    System.out.println((t1 - t0) + " " + result);
                     System.out.flush();
                 }
             }
