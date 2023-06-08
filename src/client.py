@@ -47,7 +47,7 @@ class SearchClient:
         if len(tup) != 2:
             raise RuntimeError(f'malformed response "{recv}"')
         elapsed_nanos, result = tup
-        elapsed_micros = int(int(elapsed_nanos) / 1000.)
+        elapsed_micros = int(elapsed_nanos) // 1000
         if result == "UNSUPPORTED":
             return elapsed_micros, None
         elif result == '':
@@ -63,8 +63,8 @@ class SearchClient:
 
 def drive(queries, client, command):
     for query in queries:
-        elapsed_nanos, count = client.get_count(query.query, command)
-        yield (query, count, elapsed_nanos)
+        elapsed_micros, count = client.get_count(query.query, command)
+        yield (query, count, elapsed_micros)
 
 class Query(object):
     def __init__(self, query, tags):

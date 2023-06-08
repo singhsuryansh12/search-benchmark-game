@@ -15,22 +15,22 @@ class OverlapClient:
     @staticmethod
     def parse_docs(line):
         """
-        format: count docs
-        e.g. 2 34 32
+        format: timing count docs
+        e.g. 8823 2 34 32
         """
         parts = line.split(' ')
-        n = int(parts[0])
+        n = int(parts[1])
         if n == 0:
             return []
-        docs = parts[1:]
+        docs = parts[2:]
         assert n == len(docs), "invalid record"
         return list(map(lambda x: int(x), docs))
 
     def compare(self, query: str, top_n: int):
         command: str = "TOP_N_DOCS\t{q}\t{n}\n".format(q=query, n=top_n)
         # print(command)
-        docs_left = self.parse_docs(self.left.run_command(command).decode())
-        docs_right = self.parse_docs(self.right.run_command(command).decode())
+        docs_left = self.parse_docs(self.left.run_command(command))
+        docs_right = self.parse_docs(self.right.run_command(command))
         n = max(len(docs_left), len(docs_right))
 
         if n == 0:
