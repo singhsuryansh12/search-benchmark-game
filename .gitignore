@@ -2,6 +2,7 @@
 .idea
 outputs
 results
+results.json
 benchmark/target
 tantivy/target
 lucene/build
