@@ -5,9 +5,9 @@ use tantivy_bench::get_tokenizer_manager;
 
 use std::collections::BinaryHeap;
 use std::env;
-use std::path::Path;
 use std::io::BufRead;
 use std::io::Write;
+use std::path::Path;
 use std::time::Instant;
 
 fn main() {
@@ -115,18 +115,17 @@ fn main_inner(index_dir: &Path) -> tantivy::Result<()> {
             );
         }
         let query = query_parser.parse_query(fields[1])?;
-	let t0 = Instant::now();
-	let result : String = match command {
-            "COUNT" => {
-                query.count(&searcher)?.to_string()
-            }
+        let t0 = Instant::now();
+        let result: String = match command {
+            "COUNT" => query.count(&searcher)?.to_string(),
             "TOP_10" => {
                 let _top_docs = searcher.search(&query, &TopDocs::with_limit(10))?;
-		_top_docs.len().to_string()
+                _top_docs.len().to_string()
             }
             "TOP_10_COUNT" => {
-                let (_top_docs, count) = searcher.search(&query, &(TopDocs::with_limit(10), Count))?;
-		count.to_string()
+                let (_top_docs, count) =
+                    searcher.search(&query, &(TopDocs::with_limit(10), Count))?;
+                count.to_string()
             }
             "TOP_N_DOCS" => {
                 assert_eq!(
@@ -135,7 +134,8 @@ fn main_inner(index_dir: &Path) -> tantivy::Result<()> {
                     "Expect TOP_N_DOCS command to take <QUERY> <TOP_N>"
                 );
                 let n: usize = fields[2].parse().unwrap();
-                let (top_docs, _count) = searcher.search(&query, &(TopDocs::with_limit(n), Count))?;
+                let (top_docs, _count) =
+                    searcher.search(&query, &(TopDocs::with_limit(n), Count))?;
                 let doc_ids: Vec<String> = top_docs
                     .into_iter()
                     .map(|x| x.1.doc_id.to_string())
@@ -148,19 +148,19 @@ fn main_inner(index_dir: &Path) -> tantivy::Result<()> {
                     let _checkpoints_left = checkpoints_no_pruning(&*weight, reader, 10)?;
                     let _checkpoints_right = checkpoints_pruning(&*weight, reader, 10)?;
                 }
-		// TODO: this is weird
-		"0".to_string()
+                // TODO: this is weird
+                "0".to_string()
             }
             _ => {
-		// TODO: this is weird
-	        "UNSUPPORTED".to_string()
+                // TODO: this is weird
+                "UNSUPPORTED".to_string()
             }
         };
 
-	let t1 = Instant::now();
-	println!("{} {}", (t1 - t0).as_nanos(), result);
-	// TODO: is this correct???
-	// #14: paranoia
+        let t1 = Instant::now();
+        println!("{} {}", (t1 - t0).as_nanos(), result);
+        // TODO: is this correct???
+        // #14: paranoia
         stdout.flush()?;
     }
 

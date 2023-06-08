@@ -1,5 +1,8 @@
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
+import org.apache.lucene.analysis.core.WhitespaceTokenizer;
+import org.apache.lucene.analysis.miscellaneous.LengthFilter;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.LongField;
@@ -15,6 +18,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
+import static org.apache.lucene.analysis.standard.StandardTokenizer.MAX_TOKEN_LENGTH_LIMIT;
 
 public class BuildIndex {
     public static void main(String[] args) throws IOException {
@@ -78,7 +83,14 @@ public class BuildIndex {
     }
 
     public static Analyzer getTextAnalyzer() {
-        return  new WhitespaceAnalyzer();
+        return  new Analyzer() {
+            @Override
+            protected TokenStreamComponents createComponents(String fieldName) {
+                var source = new WhitespaceTokenizer(MAX_TOKEN_LENGTH_LIMIT);
+                var filter = new LengthFilter(source, 0, 255);
+                return new TokenStreamComponents(source, filter);
+            }
+        };
     }
 
 }
