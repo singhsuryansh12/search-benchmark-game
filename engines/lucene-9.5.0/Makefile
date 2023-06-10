@@ -1,5 +1,7 @@
 export CORPUS
 
+HEAP = 4g
+
 NAME ?= "Lucene 9.5.0"
 clean:
 	@echo "--- Cleaning $(NAME) ---"
@@ -12,7 +14,7 @@ clean-index:
 compile: build
 
 serve:
-	@java -cp build/libs/search-index-benchmark-game-lucene-1.0-SNAPSHOT-all.jar DoQuery idx
+	@java -Xmx$(HEAP) -Xms$(HEAP) -cp build/libs/search-index-benchmark-game-lucene-1.0-SNAPSHOT-all.jar DoQuery idx
 
 index: idx
 

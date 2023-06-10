@@ -17,6 +17,7 @@ INDEX_DELETE_PCT ?= 2
 # Benchmark client settings
 WARMUP_ITER ?= 1
 NUM_ITER ?= 10
+MANY_ITERS = 10
 
 # Serving options
 PORT ?= 12345
@@ -50,11 +51,17 @@ dev-index:
 	@echo "$(DEV_CORPUS)"
 	@for engine in $(ENGINES); do cd ${shell pwd}/engines/$$engine && make CORPUS=$(DEV_CORPUS) index ; done
 
-bench:
+bench: compile
 	@echo "--- Benchmarking ---"
 	@rm -fr results
 	@mkdir results
 	@python3 src/client.py $(QUERY_FILE) $(ENGINES)
+
+bench_many: compile
+	@echo "--- Benchmarking ---"
+	@rm -fr results_many
+	@mkdir results_many
+	@python3 src/run_many.py $(QUERY_FILE) $(MANY_ITERS) $(ENGINES)
 
 overlap_100:
 	@echo "--- Running Overalp Test (compare top 100) ---"
