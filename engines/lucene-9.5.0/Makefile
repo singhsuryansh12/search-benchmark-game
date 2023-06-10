@@ -14,7 +14,7 @@ clean-index:
 compile: build
 
 serve:
-	@java -Xmx$(HEAP) -Xms$(HEAP) -cp build/libs/search-index-benchmark-game-lucene-1.0-SNAPSHOT-all.jar DoQuery idx
+	@java -Xmx$(HEAP) -Xms$(HEAP) -XX:+UseParallelGC -cp build/libs/search-index-benchmark-game-lucene-1.0-SNAPSHOT-all.jar DoQuery idx
 
 index: idx
 
