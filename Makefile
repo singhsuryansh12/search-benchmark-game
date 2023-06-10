@@ -17,7 +17,7 @@ INDEX_DELETE_PCT ?= 2
 # Benchmark client settings
 WARMUP_ITER ?= 1
 NUM_ITER ?= 10
-MANY_ITERS = 10
+MANY_ITERS ?= 10
 
 # Serving options
 PORT ?= 12345
