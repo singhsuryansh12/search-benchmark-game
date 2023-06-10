@@ -2,6 +2,7 @@ import os
 import sys
 import glob
 import json
+import statistics
 
 tasks = None
 
@@ -40,15 +41,16 @@ for task in tasks:
             for run in query_runs:
                 all_mins.append(run['duration'][0])
             all_mins.sort()
-            if all_mins[0] > 10000:
-                pct_diff = 100. * (all_mins[-1] - all_mins[0])/all_mins[-1]
+            if all_mins[0] > 1000:
+                stdev = statistics.stdev(all_mins)
+                mean = statistics.mean(all_mins)
                 #print(f'{task} {engine} {query_runs[0]["tags"][0]} {query_runs[0]["query"]}: {pct_diff} {all_mins}')
-                all_results_mins.append((pct_diff, query_runs[0], all_mins))
+                all_results_mins.append((100.*stdev/mean, query_runs[0], all_mins))
         all_results_mins.sort(key=lambda x: -x[0])
         aggd[(task, engine)] = all_results_mins
 
 # print highest pct diff by (task, engine)
 for (task, engine), all_results_mins in aggd.items():
-    print(f'{task} {engine}:')
-    for pct_diff, query, mins in all_results_mins:
-        print(f'  {pct_diff:.1f}%: {query["query"]} {mins}')
+    print(f'\nlooksee: {task} {engine}:')
+    for stdev_pct, query, mins in all_results_mins[:20]:
+        print(f'  stdev {stdev_pct:.1f}%: {query["query"]} {mins}')
