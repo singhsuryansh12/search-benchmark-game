@@ -45,7 +45,7 @@ class SearchClient:
         # print('  recv: ' + recv)
         tup = recv.split(' ', 1)
         if len(tup) != 2:
-            raise RuntimeError(f'malformed response "{recv}"')
+            raise RuntimeError(f'malformed response "{recv}"\n{self.process.stderr.read().decode("utf-8")}')
         elapsed_nanos, result = tup
         elapsed_micros = int(elapsed_nanos) // 1000
         if result == "UNSUPPORTED":
