@@ -3,14 +3,14 @@ use whitespace_tokenizer_fork::WhitespaceTokenizer;
 
 pub fn get_tokenizer_manager() -> TokenizerManager {
     let tokenzier_manager = TokenizerManager::default();
-    let tokenizer = TextAnalyzer::from(WhitespaceTokenizer).filter(RemoveLongFilter::limit(256));
+    let tokenizer = TextAnalyzer::builder(WhitespaceTokenizer).filter(RemoveLongFilter::limit(256)).build();
     tokenzier_manager.register("whitespace", tokenizer);
     tokenzier_manager
 }
 
 mod whitespace_tokenizer_fork {
 
-    use tantivy::tokenizer::{Token, Tokenizer, BoxTokenStream, TokenStream};
+    use tantivy::tokenizer::{Token, Tokenizer, TokenStream};
     use std::str::CharIndices;
 
     /// Tokenize the text by splitting on whitespaces.
@@ -24,8 +24,10 @@ mod whitespace_tokenizer_fork {
     }
 
     impl Tokenizer for WhitespaceTokenizer {
-        fn token_stream<'a>(&self, text: &'a str) -> BoxTokenStream<'a> {
-            BoxTokenStream::from(WhitespaceTokenStream {
+        type TokenStream<'a> = BoxTokenStreamFork<'a>;
+
+        fn token_stream<'a>(&'a mut self, text: &'a str) -> Self::TokenStream<'a> {
+            BoxTokenStreamFork::new(WhitespaceTokenStream {
                 text,
                 chars: text.char_indices(),
                 token: Token::default(),
@@ -66,6 +68,28 @@ mod whitespace_tokenizer_fork {
 
         fn token_mut(&mut self) -> &mut Token {
             &mut self.token
+        }
+    }
+
+    pub struct BoxTokenStreamFork<'a>(Box<dyn TokenStream + 'a>);
+
+    impl<'a> TokenStream for BoxTokenStreamFork<'a> {
+        fn advance(&mut self) -> bool {
+            self.0.advance()
+        }
+
+        fn token(&self) -> &Token {
+            self.0.token()
+        }
+
+        fn token_mut(&mut self) -> &mut Token {
+            self.0.token_mut()
+        }
+    }
+
+    impl<'a> BoxTokenStreamFork<'a> {
+        pub fn new<T: TokenStream + 'a>(token_stream: T) -> BoxTokenStreamFork<'a> {
+            BoxTokenStreamFork(Box::new(token_stream))
         }
     }
 

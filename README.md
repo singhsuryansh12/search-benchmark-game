@@ -33,14 +33,14 @@ PhraseQuery (with slop)
 * The search thread is a simple Rust client, spwaning a sub-process running either Tantivy or Lucene and communicating over a local Unix pipe
 
 ### Tantivy
-* Version: 0.19
-* Rust version: ???
+* Version: 0.20
+* Rust version: 1.71.1
 
 Features: All default
 
 ### Lucene
-* Version: 9.5.0
-* JDK version/flags: ???
+* Version: 9.7.0
+* JDK version/flags: 17/???
 * Disabled query cache.
 
 
