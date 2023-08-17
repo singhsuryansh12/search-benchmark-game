@@ -24,14 +24,14 @@ mod whitespace_tokenizer_fork {
     }
 
     impl Tokenizer for WhitespaceTokenizer {
-        type TokenStream<'a> = BoxTokenStreamFork<'a>;
+        type TokenStream<'a> = WhitespaceTokenStream<'a>;
 
-        fn token_stream<'a>(&'a mut self, text: &'a str) -> Self::TokenStream<'a> {
-            BoxTokenStreamFork::new(WhitespaceTokenStream {
+        fn token_stream<'a>(&'a mut self, text: &'a str) -> WhitespaceTokenStream<'a> {
+            WhitespaceTokenStream {
                 text,
                 chars: text.char_indices(),
                 token: Token::default(),
-            })
+            }
         }
     }
 
@@ -68,28 +68,6 @@ mod whitespace_tokenizer_fork {
 
         fn token_mut(&mut self) -> &mut Token {
             &mut self.token
-        }
-    }
-
-    pub struct BoxTokenStreamFork<'a>(Box<dyn TokenStream + 'a>);
-
-    impl<'a> TokenStream for BoxTokenStreamFork<'a> {
-        fn advance(&mut self) -> bool {
-            self.0.advance()
-        }
-
-        fn token(&self) -> &Token {
-            self.0.token()
-        }
-
-        fn token_mut(&mut self) -> &mut Token {
-            self.0.token_mut()
-        }
-    }
-
-    impl<'a> BoxTokenStreamFork<'a> {
-        pub fn new<T: TokenStream + 'a>(token_stream: T) -> BoxTokenStreamFork<'a> {
-            BoxTokenStreamFork(Box::new(token_stream))
         }
     }
 
