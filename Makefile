@@ -64,14 +64,19 @@ bench_many: compile
 	@python3 src/run_many.py $(QUERY_FILE) $(MANY_ITERS) $(ENGINES)
 
 overlap_100:
-	@echo "--- Running Overalp Test (compare top 100) ---"
+	@echo "--- Running Overlap Test (compare top 100) ---"
 	@python3 src/overlap.py "queries/basic_queries_no_sloppy_phrase.jsonl" $(ENGINES)
 
 compile:
 	@echo "--- Compiling binaries ---"
 	@for engine in $(ENGINES); do cd ${shell pwd}/engines/$$engine && make compile ; done
 
+serve_local:
+	@echo "--- Serving results locally ---"
+	@cp results.json web/build/results.json
+	@cd web/build && python3 -m http.server $(PORT) --bind localhost
+
 serve:
 	@echo "--- Serving results ---"
 	@cp results.json web/build/results.json
-	@cd web/build && python3 -m http.server $(PORT) --bind localhost
+	@cd web/build && python3 -m http.server $(PORT)
