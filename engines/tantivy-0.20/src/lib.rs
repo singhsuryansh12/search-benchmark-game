@@ -3,14 +3,14 @@ use whitespace_tokenizer_fork::WhitespaceTokenizer;
 
 pub fn get_tokenizer_manager() -> TokenizerManager {
     let tokenzier_manager = TokenizerManager::default();
-    let tokenizer = TextAnalyzer::from(WhitespaceTokenizer).filter(RemoveLongFilter::limit(256));
+    let tokenizer = TextAnalyzer::builder(WhitespaceTokenizer).filter(RemoveLongFilter::limit(256)).build();
     tokenzier_manager.register("whitespace", tokenizer);
     tokenzier_manager
 }
 
 mod whitespace_tokenizer_fork {
 
-    use tantivy::tokenizer::{Token, Tokenizer, BoxTokenStream, TokenStream};
+    use tantivy::tokenizer::{Token, Tokenizer, TokenStream};
     use std::str::CharIndices;
 
     /// Tokenize the text by splitting on whitespaces.
@@ -24,12 +24,14 @@ mod whitespace_tokenizer_fork {
     }
 
     impl Tokenizer for WhitespaceTokenizer {
-        fn token_stream<'a>(&self, text: &'a str) -> BoxTokenStream<'a> {
-            BoxTokenStream::from(WhitespaceTokenStream {
+        type TokenStream<'a> = WhitespaceTokenStream<'a>;
+
+        fn token_stream<'a>(&'a mut self, text: &'a str) -> WhitespaceTokenStream<'a> {
+            WhitespaceTokenStream {
                 text,
                 chars: text.char_indices(),
                 token: Token::default(),
-            })
+            }
         }
     }
 

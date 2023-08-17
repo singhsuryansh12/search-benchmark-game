@@ -1,4 +1,4 @@
-NAME := "tantivy 0.19"
+NAME := "tantivy 0.20"
 export CORPUS
 
 clean:
@@ -19,5 +19,5 @@ serve: target/release/do_query
 	@target/release/do_query idx
 
 target/release/%: src/bin/%.rs src/lib.rs
-	@echo "--- Building tantivy's binary ---" >&2
+	@echo "--- Building $(NAME) binary ---" >&2
 	@cargo build --release --bin $(notdir $@)

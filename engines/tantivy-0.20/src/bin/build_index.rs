@@ -2,7 +2,7 @@ use futures::executor::block_on;
 use std::env;
 use std::io::BufRead;
 use std::path::Path;
-use tantivy::schema::{Cardinality, NumericOptions, Schema, TEXT};
+use tantivy::schema::{NumericOptions, Schema, TEXT};
 use tantivy::{doc, IndexBuilder, IndexSettings, IndexSortByField, Order, Term};
 use tantivy_bench::get_tokenizer_manager;
 
@@ -29,7 +29,7 @@ fn main_inner(output_dir: &Path, index_delete_pct: i32) -> tantivy::Result<()> {
         "id",
         NumericOptions::default()
             .set_indexed()
-            .set_fast(Cardinality::SingleValue),
+            .set_fast(),
     );
     let schema = schema_builder.build();
 

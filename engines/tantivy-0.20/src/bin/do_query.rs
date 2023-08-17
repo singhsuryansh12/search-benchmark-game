@@ -143,7 +143,7 @@ fn main_inner(index_dir: &Path) -> tantivy::Result<()> {
                 doc_ids.len().to_string() + " " + &doc_ids.join(" ").to_string()
             }
             "DEBUG_TOP_10" => {
-                let weight = query.weight(tantivy::query::EnableScoring::Enabled(&searcher))?;
+                let weight = query.weight(tantivy::query::EnableScoring::enabled_from_searcher(&searcher))?;
                 for reader in searcher.segment_readers() {
                     let _checkpoints_left = checkpoints_no_pruning(&*weight, reader, 10)?;
                     let _checkpoints_right = checkpoints_pruning(&*weight, reader, 10)?;
