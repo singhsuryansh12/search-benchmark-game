@@ -122,6 +122,10 @@ fn main_inner(index_dir: &Path) -> tantivy::Result<()> {
                 let _top_docs = searcher.search(&query, &TopDocs::with_limit(10))?;
                 _top_docs.len().to_string()
             }
+            "TOP_100" => {
+                let _top_docs = searcher.search(&query, &TopDocs::with_limit(100))?;
+                _top_docs.len().to_string()
+            }
             "TOP_10_COUNT" => {
                 let (_top_docs, count) =
                     searcher.search(&query, &(TopDocs::with_limit(10), Count))?;

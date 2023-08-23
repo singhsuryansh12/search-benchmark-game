@@ -44,14 +44,25 @@ public class DoQuery {
                             break;
                         case "TOP_10":
                         {
-                            final TopDocs topDocs = searcher.search(query, 10);
-                            int count = (int) topDocs.totalHits.value;
+                            // Collector enabled manually to enable dynamic pruning immediately.
+                            final TopScoreDocCollector topScoreDocCollector = TopScoreDocCollector.create(10, 10);
+                            searcher.search(query, topScoreDocCollector);
+                            int count = topScoreDocCollector.getTotalHits();
+                            result = Integer.toString(count);
+                        }
+                            break;
+                        case "TOP_100":
+                        {
+                            // Collector enabled manually to enable dynamic pruning immediately.
+                            final TopScoreDocCollector topScoreDocCollector = TopScoreDocCollector.create(100, 100);
+                            searcher.search(query, topScoreDocCollector);
+                            int count = topScoreDocCollector.getTotalHits();
                             result = Integer.toString(count);
                         }
                             break;
                         case "TOP_10_COUNT":
                         {
-                            // NOTE: this disables BMW (by passing 2nd argument Integer.MAX_VALUE
+                            // NOTE: this disables BMW (by passing 2nd argument Integer.MAX_VALUE)
                             final TopScoreDocCollector topScoreDocCollector = TopScoreDocCollector.create(10, Integer.MAX_VALUE);
                             searcher.search(query, topScoreDocCollector);
                             int count = topScoreDocCollector.getTotalHits();
@@ -62,7 +73,7 @@ public class DoQuery {
                         {
                             assert fields.length == 3;
                             int n = Integer.parseInt(fields[2]);
-                            // TODO: why not just the IS.search method?
+                            // Collector enabled manually to enable dynamic pruning immediately.
                             final TopScoreDocCollector topScoreDocCollector = TopScoreDocCollector.create(n, n);
                             searcher.search(query, topScoreDocCollector);
                             StringBuilder sb = new StringBuilder();
