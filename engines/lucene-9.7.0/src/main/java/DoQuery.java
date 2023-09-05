@@ -4,7 +4,6 @@ import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.TopScoreDocCollector;
 import org.apache.lucene.store.FSDirectory;
 
@@ -44,38 +43,25 @@ public class DoQuery {
                             break;
                         case "TOP_10":
                         {
-                            // Collector enabled manually to enable dynamic pruning immediately.
-                            final TopScoreDocCollector topScoreDocCollector = TopScoreDocCollector.create(10, 10);
-                            searcher.search(query, topScoreDocCollector);
-                            int count = topScoreDocCollector.getTotalHits();
-                            result = Integer.toString(count);
+                            result = topNTotalHits(10, 10, searcher, query);
                         }
                             break;
                         case "TOP_100":
                         {
-                            // Collector enabled manually to enable dynamic pruning immediately.
-                            final TopScoreDocCollector topScoreDocCollector = TopScoreDocCollector.create(100, 100);
-                            searcher.search(query, topScoreDocCollector);
-                            int count = topScoreDocCollector.getTotalHits();
-                            result = Integer.toString(count);
+                            result = topNTotalHits(100, 100, searcher, query);
                         }
                             break;
                         case "TOP_10_COUNT":
                         {
-                            // NOTE: this disables BMW (by passing 2nd argument Integer.MAX_VALUE)
-                            final TopScoreDocCollector topScoreDocCollector = TopScoreDocCollector.create(10, Integer.MAX_VALUE);
-                            searcher.search(query, topScoreDocCollector);
-                            int count = topScoreDocCollector.getTotalHits();
-                            result = Integer.toString(count);
+                            // NOTE: this disables BMW (by passing 2nd argument, totalHitsThreshold as Integer.MAX_VALUE)
+                            result = topNTotalHits(10, Integer.MAX_VALUE, searcher, query);
                         }
                             break;
                         case "TOP_N_DOCS":
                         {
                             assert fields.length == 3;
                             int n = Integer.parseInt(fields[2]);
-                            // Collector enabled manually to enable dynamic pruning immediately.
-                            final TopScoreDocCollector topScoreDocCollector = TopScoreDocCollector.create(n, n);
-                            searcher.search(query, topScoreDocCollector);
+                            TopScoreDocCollector topScoreDocCollector = searchTopN(n, n, searcher, query);
                             StringBuilder sb = new StringBuilder();
                             var docs = topScoreDocCollector.topDocs().scoreDocs;
                             sb.append(docs.length);
@@ -96,5 +82,18 @@ public class DoQuery {
                 }
             }
         }
+    }
+
+    public static String topNTotalHits(int numHits, int totalHitsThreshold, IndexSearcher searcher, Query query) throws IOException {
+        TopScoreDocCollector topScoreDocCollector = searchTopN(numHits, totalHitsThreshold, searcher, query);
+        int count = topScoreDocCollector.getTotalHits();
+        return Integer.toString(count);
+    }
+
+    public static TopScoreDocCollector searchTopN(int numHits, int totalHitsThreshold, IndexSearcher searcher, Query query) throws IOException {
+        // Collector enabled manually to enable dynamic pruning immediately.
+        TopScoreDocCollector topScoreDocCollector = TopScoreDocCollector.create(numHits, totalHitsThreshold);
+        searcher.search(query, topScoreDocCollector);
+        return topScoreDocCollector;
     }
 }
