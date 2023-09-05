@@ -119,8 +119,10 @@ fn main_inner(index_dir: &Path) -> tantivy::Result<()> {
         let result: String = match command {
             "COUNT" => query.count(&searcher)?.to_string(),
             "TOP_10" => {
-                let _top_docs = searcher.search(&query, &TopDocs::with_limit(10))?;
-                _top_docs.len().to_string()
+                top_n_total_hits(10, &searcher, &query)
+            }
+            "TOP_100" => {
+                top_n_total_hits(100, &searcher, &query)
             }
             "TOP_10_COUNT" => {
                 let (_top_docs, count) =
@@ -165,4 +167,9 @@ fn main_inner(index_dir: &Path) -> tantivy::Result<()> {
     }
 
     Ok(())
+}
+
+fn top_n_total_hits(limit: usize, searcher: &tantivy::Searcher, query: &dyn tantivy::query::Query) -> String {
+    let _top_docs = searcher.search(query, &TopDocs::with_limit(limit)).unwrap();
+    _top_docs.len().to_string()
 }
