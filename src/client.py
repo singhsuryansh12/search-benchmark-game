@@ -42,6 +42,7 @@ class SearchClient:
         # print(query_line)
         query_line = "%s\t%s\n" % (command, query)
         recv = self.run_command(query_line)
+        # print("Response is ", recv)
         # print('  recv: ' + recv)
         tup = recv.split(' ', 1)
         if len(tup) != 2:
