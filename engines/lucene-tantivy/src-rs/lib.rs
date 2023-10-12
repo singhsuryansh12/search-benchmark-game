@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 use jni::JNIEnv;
-use jni::objects::{JClass, JString};
-use jni::sys::jint;
+use jni::objects::{JClass, JString, JObject, JObjectArray};
+use jni::sys::{jint, jobjectArray};
 
 use crate::util::{build_index, do_query};
 use tantivy::tokenizer::{RemoveLongFilter, TextAnalyzer, TokenizerManager};
@@ -30,17 +30,40 @@ pub extern "system" fn Java_SearchTantivy_buildindex<'local>(
 pub extern "system" fn Java_SearchTantivy_doquery<'local>(
     mut env: JNIEnv<'local>,
     class: JClass<'local>,
-    input_dir: JString<'local>,
-) {
-    let input_dir: String = String::from(env
-        .get_string(&input_dir)
+    index_dir: JString<'local>,
+    query_field: JString<'local>,
+    command: JString<'local>,
+) -> JString<'local> {
+    let idx_dir: String = String::from(env
+        .get_string(&index_dir)
         .expect("Couldn't get java string"));
 
-    let _ = do_query::main_inner(&Path::new(&input_dir));
+        // let array_length = env.get_array_length(&query_fields).expect("Failed to get array length");
 
+        // let mut rust_strings: Vec<String> = Vec::new();
+
+        // for i in 0..array_length {
+        //     let query_object: JObject = env.get_object_array_element(&query_fields, i).expect("Failed to get array element");
+        //     let rust_string: String = env.get_string(&JString::from(query_object)).expect("Failed to convert to JString").into();
+            
+        //     // Convert the JString to a Rust string and push it into the vector.
+        //     // let rust_string = env.get_string_utf_chars(jstring).expect("Failed to get UTF-8 string");
+            
+        //     rust_strings.push(rust_string);
+            
+        //     // Release the JString to avoid memory leaks.
+        //     // env.release_string_utf_chars(jstring, rust_string);
+        // }
+        let query_fld: String = String::from(env
+            .get_string(&query_field)
+            .expect("Couldn't get java string"));
+        let cmd: String = String::from(env
+            .get_string(&command)
+            .expect("Couldn't get java string"));
+
+    let result = do_query::main_inner(&Path::new(&idx_dir), query_fld, cmd);
+    env.new_string(result.unwrap()).expect("Failed to create JString from Rust string")
 }
-
-
 
 
 pub fn get_tokenizer_manager() -> TokenizerManager {

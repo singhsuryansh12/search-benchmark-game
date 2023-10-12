@@ -8,7 +8,7 @@ use tantivy::{doc, IndexBuilder, IndexSettings, IndexSortByField, Order, Term};
 use crate::get_tokenizer_manager;
 
 pub fn main_inner(output_dir: &Path, index_delete_pct: i32) -> tantivy::Result<()> {
-    println!("Build index at `{}` with delete_pct {}%", output_dir.display(), index_delete_pct);
+    // println!("Build index at `{}` with delete_pct {}%", output_dir.display(), index_delete_pct);
 
     let mut schema_builder = Schema::builder();
 
@@ -59,13 +59,13 @@ pub fn main_inner(output_dir: &Path, index_delete_pct: i32) -> tantivy::Result<(
             // (title, date, body, label)
             let parsed_line: Vec<&str> = line.split('\t').collect();
             if parsed_line.len() != 4 {
-                println!("Skipping malformed line: {}", line);
+                // println!("Skipping malformed line: {}", line);
                 num_skipped += 1;
                 continue;
             }
             i += 1;
             if i % 100_000 == 0 {
-                println!("{}", i);
+                // println!("{}", i);
             }
             let doc = doc!(
                 id_field => i as u64,
@@ -95,6 +95,6 @@ pub fn main_inner(output_dir: &Path, index_delete_pct: i32) -> tantivy::Result<(
     index_writer.commit()?;
 
     block_on(index_writer.garbage_collect_files())?;
-    println!("Done. Read {i} docs, skipped {num_skipped}, deleted {num_deleted}");
+    // println!("Done. Read {i} docs, skipped {num_skipped}, deleted {num_deleted}");
     Ok(())
 }

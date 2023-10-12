@@ -3,7 +3,7 @@ class SearchTantivy {
     // a native library.
     
     public static native void buildindex(String output_dir, int idx_del_pct);
-    public static native void doquery(String input_dir);
+    public static native String doquery(String index_dir, String query_field, String command);
 
     static {
         // This actually loads the shared object that we'll be creating.
@@ -11,7 +11,7 @@ class SearchTantivy {
         // platform.
     // System.out.println(System.getProperty("java.library.path"));
     // System.setProperty("java.library.path", "./mylib/target/debug");
-    System.load("/Volumes/workplace/TantivyHackathon/search-benchmark-game/engines/lucene-tantivy/target/release/libtantivy_jni.dylib");
+    System.load("/Volumes/workplace/search-benchmark-game/engines/lucene-tantivy/target/release/libtantivy_jni.dylib");
     }
 
     // The rest is just regular ol' Java!
