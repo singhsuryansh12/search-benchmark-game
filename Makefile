@@ -8,8 +8,7 @@ export
 # What to bench?
 # COMMANDS ?= TOP_10
 COMMANDS ?= TOP_10_COUNT COUNT TOP_100
-# ENGINES ?= lucene-tantivy tantivy-0.20 lucene-9.7.0 
-ENGINES ?= tantivy-0.20
+ENGINES ?= lucene-tantivy tantivy-0.20 lucene-9.7.0
 QUERY_FILE ?= queries/basic_queries.jsonl
 
 # Index settings

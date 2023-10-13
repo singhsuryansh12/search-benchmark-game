@@ -63,6 +63,7 @@ The workload is run against both engines in multiple iterations, including a war
 * JDK 17+. The are plenty of ways to install it.
 * Gradle - 8.1 or up.
 * Python3.6+.
+* Update the absolute path in  SearchTantivy::static::System.load() of engines/lucene-tantivy/src/main/java/SearchTantivy.java
 
 ## Quick verification
 ```
